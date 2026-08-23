@@ -1,0 +1,38 @@
+# Representative docker-compose.yml showing the general, standard Ollama + Open WebUI
+# setup pattern used by this project (a well-documented public pattern).
+# This is an example of the architecture, not the exact production configuration.
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    # Uncomment to enable GPU access (requires the NVIDIA Container Toolkit)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - open_webui_data:/app/backend/data
+    ports:
+      - "3000:8080"
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  open_webui_data:
